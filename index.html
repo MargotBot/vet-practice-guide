@@ -4,22 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Modern Veterinary Practice Management Guide</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.css" rel="stylesheet">
     <link href="styles.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
-    <div id="flipbook">
-        <div id="page-content">
-            <h1>Modern Veterinary Practice Management</h1>
-            <h2>A Comprehensive Guide for Small and Medium Practices</h2>
-            <p class="author">2024 Edition</p>
-        </div>
-        <div class="navigation">
-            <button id="prev-page" disabled>Previous</button>
-            <span id="page-number">Page 1</span>
-            <button id="next-page">Next</button>
+    <div class="flipbook-container">
+        <div id="flipbook">
+            <div class="hard"> <!-- Cover -->
+                <div class="page-content">
+                    <h1>Modern Veterinary Practice Management</h1>
+                    <h2>A Comprehensive Guide for Small and Medium Practices</h2>
+                    <p class="author">2025 Edition</p>
+                </div>
+            </div>
+            <div class="page"> <!-- Table of Contents -->
+                <div class="page-content">
+                    <h1>Table of Contents</h1>
+                    <ol>
+                        <li>Modern Practice Foundations</li>
+                        <li>Financial Management & Sustainability</li>
+                        <li>Addressing Financial Limitations</li>
+                        <li>Mental Health Integration</li>
+                        <li>Staff Management & Development</li>
+                        <li>Client Experience & Communication</li>
+                        <li>Technology Integration</li>
+                        <li>Operations Excellence</li>
+                        <li>Future-Proofing Your Practice</li>
+                    </ol>
+                </div>
+            </div>
         </div>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
