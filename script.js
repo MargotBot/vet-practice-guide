@@ -16,4 +16,14 @@ $(document).ready(function() {
             }
         }
     });
+
+    // Load chapter content
+    for(let i = 1; i <= 9; i++) {
+        $.get(`chapters/chapter${i}.html`, function(data) {
+            const pageDiv = $('<div/>', {
+                class: 'page'
+            }).html(data);
+            $('#flipbook').turn('addPage', pageDiv);
+        });
+    }
 });
