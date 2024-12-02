@@ -1,0 +1,26 @@
+[
+    {
+        "title": "Introduction",
+        "file": "chapter1.md",
+        "pageStart": 1,
+        "pageEnd": 5
+    },
+    {
+        "title": "Practice Setup and Organization",
+        "file": "chapter2.md",
+        "pageStart": 6,
+        "pageEnd": 15
+    },
+    {
+        "title": "Financial Management",
+        "file": "chapter3.md",
+        "pageStart": 16,
+        "pageEnd": 25
+    },
+    {
+        "title": "Staff Management",
+        "file": "chapter4.md",
+        "pageStart": 26,
+        "pageEnd": 35
+    }
+]
