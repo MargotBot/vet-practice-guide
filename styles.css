@@ -1,114 +1,109 @@
-
-body {
-    margin: 0;
-    padding: 20px;
-    background: #f0f0f0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    overflow: hidden;
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #3498db;
+    --background-color: #f8f9fa;
+    --text-color: #2c3e50;
+    --border-color: #e9ecef;
 }
 
-.flipbook-container {
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: -20px;  /* Compensate for body padding */
-    padding: 20px;
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--background-color);
+    margin: 0;
+    padding: 0;
 }
 
 #flipbook {
-    width: 1000px;
-    height: 700px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.2);
-}
-
-.page {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
     background: white;
-    background-image: linear-gradient(to right, #fff 95%, #ddd 100%);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
 }
 
-.hard {
-    background: #003366 !important;
+#page-content {
+    min-height: 70vh;
+    padding: 2rem;
+    font-size: 1.1rem;
+}
+
+.navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-top: 1px solid var(--border-color);
+    margin-top: 2rem;
+}
+
+button {
+    background-color: var(--secondary-color);
     color: white;
-    background-image: none !important;
-}
-
-.page-content {
-    padding: 30px;
-    height: calc(100% - 60px);
-    overflow-y: auto;
-}
-
-h1 {
-    color: #003366;
-    margin-bottom: 20px;
-    font-size: 2em;
-    border-bottom: 2px solid #003366;
-    padding-bottom: 10px;
-}
-
-.hard h1 {
-    color: white;
-    text-align: center;
-    margin-top: 200px;
     border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
 }
 
-.hard h2 {
-    color: #ccc;
-    text-align: center;
-    font-size: 1.2em;
-    margin-top: 20px;
+button:hover {
+    background-color: #2980b9;
 }
 
-.hard .author {
-    position: absolute;
-    bottom: 50px;
-    width: 100%;
-    text-align: center;
-    color: #ccc;
-    left: 0;
+button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
 }
 
-h2 {
-    color: #004d99;
-    margin-top: 30px;
-    margin-bottom: 15px;
+#page-number {
+    font-size: 1.1rem;
+    color: var(--primary-color);
 }
+
+/* Typography improvements */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--primary-color);
+    margin-top: 1.5em;
+    margin-bottom: 0.75em;
+    line-height: 1.2;
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.75rem; }
+h4 { font-size: 1.5rem; }
 
 p {
-    line-height: 1.6;
-    color: #333;
-    margin-bottom: 15px;
+    margin-bottom: 1.2em;
 }
 
-ul, ol {
-    padding-left: 25px;
-    margin-bottom: 20px;
+/* Responsive design */
+@media (max-width: 768px) {
+    #flipbook {
+        margin: 1rem;
+        padding: 1rem;
+    }
+
+    #page-content {
+        padding: 1rem;
+        font-size: 1rem;
+    }
+
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.75rem; }
+    h3 { font-size: 1.5rem; }
+    h4 { font-size: 1.25rem; }
 }
 
-li {
-    margin-bottom: 10px;
-    line-height: 1.4;
-}
-
-strong {
-    color: #003366;
-}
-
-/* Table of Contents specific styles */
-.table-of-contents ol {
-    list-style-type: decimal;
-    padding-left: 30px;
-}
-
-.table-of-contents li {
-    padding: 5px 0;
-    cursor: pointer;
-    transition: color 0.3s;
-}
-
-.table-of-contents li:hover {
-    color: #0066cc;
+/* Error handling styles */
+.error {
+    color: #e74c3c;
+    padding: 1rem;
+    border: 1px solid #e74c3c;
+    border-radius: 4px;
+    margin: 1rem 0;
+    background-color: #fde8e8;
 }
