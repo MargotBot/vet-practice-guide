@@ -1,91 +1,84 @@
+document.addEventListener('DOMContentLoaded', function() {
+    const flipbook = document.getElementById('flipbook');
+    const pageContainer = document.getElementById('page-content');
+    let currentPage = 1;
+    let chapters = [];
 
-$(document).ready(function() {
-  var totalChapters = 9;
-  var loadedChapters = 0;
-
-  // Initialize the flipbook
-  $("#flipbook").turn({
-    width: 1000,
-    height: 700,
-    autoCenter: true,
-    gradients: true,
-    acceleration: true,
-    elevation: 50,
-    display: 'double',
-    when: {
-      turning: function(e, page, view) {
-        // Disable right-click on pages
-        $('.page-content').on('contextmenu', function(e) {
-          return false;
-        });
-      },
-      turned: function(e, page) {
-        // Update URL hash for direct linking
-        window.location.hash = page;
-      }
-    }
-  });
-
-  // Load chapters
-  function loadChapter(chapterNum) {
-    $.ajax({
-      url: 'chapters/chapter' + chapterNum + '.html',
-      method: 'GET',
-      success: function(content) {
-        const pageDiv = $('<div/>', {
-          class: 'page'
-        }).html(content);
-        
-        $('#flipbook').turn('addPage', pageDiv, chapterNum + 2); // +2 to account for cover and TOC
-        loadedChapters++;
-        
-        if (loadedChapters === totalChapters) {
-          // All chapters loaded
-          console.log('All chapters loaded successfully');
+    async function loadChapters() {
+        try {
+            const response = await fetch('chapters.json');
+            chapters = await response.json();
+            initializeBook();
+        } catch (error) {
+            console.error('Error loading chapters:', error);
+            pageContainer.innerHTML = '<p class="error">Error loading content. Please try again later.</p>';
         }
-      },
-      error: function() {
-        console.log('Failed to load chapter ' + chapterNum);
-        // Add placeholder page for missing chapters
-        const placeholder = $('<div/>', {
-          class: 'page'
-        }).html('<div class=\"page-content\"><h1>Chapter ' + chapterNum + '</h1><p>Content coming soon...</p></div>');
+    }
+
+    function initializeBook() {
+        displayCurrentPage();
+        setupNavigation();
+        handleURLParameters();
+    }
+
+    function displayCurrentPage() {
+        if (!chapters.length) return;
         
-        $('#flipbook').turn('addPage', placeholder, chapterNum + 2);
-        loadedChapters++;
-      }
-    });
-  }
-
-  // Load all chapters
-  for(let i = 1; i <= totalChapters; i++) {
-    loadChapter(i);
-  }
-
-  // Responsive sizing
-  $(window).resize(function() {
-    var width = Math.min(1000, $(window).width() - 40);
-    var height = (width / 1000) * 700;
-    $('#flipbook').turn('size', width, height);
-  }).resize();
-
-  // Keyboard navigation
-  $(document).keydown(function(e) {
-    switch(e.keyCode) {
-      case 37: // left arrow
-        $('#flipbook').turn('previous');
-        break;
-      case 39: // right arrow
-        $('#flipbook').turn('next');
-        break;
+        const chapter = chapters.find(c => c.pageStart <= currentPage && c.pageEnd >= currentPage);
+        if (chapter) {
+            fetch(`chapters/${chapter.file}`)
+                .then(response => response.text())
+                .then(content => {
+                    pageContainer.innerHTML = marked(content);
+                    updatePageNumber();
+                })
+                .catch(error => {
+                    console.error('Error loading page content:', error);
+                    pageContainer.innerHTML = '<p class="error">Error loading page content.</p>';
+                });
+        }
     }
-  });
 
-  // Handle hash changes for direct linking to pages
-  if (window.location.hash) {
-    var page = parseInt(window.location.hash.substring(1));
-    if (!isNaN(page)) {
-      $('#flipbook').turn('page', page);
+    function setupNavigation() {
+        document.getElementById('prev-page').addEventListener('click', () => navigateToPage(currentPage - 1));
+        document.getElementById('next-page').addEventListener('click', () => navigateToPage(currentPage + 1));
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') navigateToPage(currentPage - 1);
+            if (e.key === 'ArrowRight') navigateToPage(currentPage + 1);
+        });
     }
-  }
+
+    function navigateToPage(newPage) {
+        const maxPage = chapters.reduce((max, chapter) => Math.max(max, chapter.pageEnd), 0);
+        if (newPage >= 1 && newPage <= maxPage) {
+            currentPage = newPage;
+            displayCurrentPage();
+            updateURL();
+        }
+    }
+
+    function updatePageNumber() {
+        document.getElementById('page-number').textContent = `Page ${currentPage}`;
+    }
+
+    function updateURL() {
+        const url = new URL(window.location);
+        url.searchParams.set('page', currentPage);
+        window.history.pushState({}, '', url);
+    }
+
+    function handleURLParameters() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const pageParam = urlParams.get('page');
+        if (pageParam) {
+            const page = parseInt(pageParam);
+            if (!isNaN(page)) {
+                navigateToPage(page);
+            }
+        }
+    }
+
+    // Initialize the flipbook
+    loadChapters();
 });
