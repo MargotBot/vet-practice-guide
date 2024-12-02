@@ -1,84 +1,95 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const flipbook = document.getElementById('flipbook');
-    const pageContainer = document.getElementById('page-content');
+    const pageContent = document.getElementById('page-content');
+    const prevButton = document.getElementById('prev-page');
+    const nextButton = document.getElementById('next-page');
+    const pageNumber = document.getElementById('page-number');
     let currentPage = 1;
     let chapters = [];
 
-    async function loadChapters() {
-        try {
-            const response = await fetch('chapters.json');
-            chapters = await response.json();
-            initializeBook();
-        } catch (error) {
+    // Load chapters configuration
+    fetch('chapters.json')
+        .then(response => response.json())
+        .then(data => {
+            chapters = data;
+            displayCurrentPage();
+            updateNavigation();
+        })
+        .catch(error => {
             console.error('Error loading chapters:', error);
-            pageContainer.innerHTML = '<p class="error">Error loading content. Please try again later.</p>';
-        }
-    }
-
-    function initializeBook() {
-        displayCurrentPage();
-        setupNavigation();
-        handleURLParameters();
-    }
+            pageContent.innerHTML = `<p class="error">Error loading content: ${error.message}</p>`;
+        });
 
     function displayCurrentPage() {
-        if (!chapters.length) return;
-        
-        const chapter = chapters.find(c => c.pageStart <= currentPage && c.pageEnd >= currentPage);
+        if (currentPage === 1) {
+            // Display cover page
+            pageContent.innerHTML = `
+                <h1>Modern Veterinary Practice Management</h1>
+                <h2>A Comprehensive Guide for Small and Medium Practices</h2>
+                <p class="author">2024 Edition</p>
+            `;
+            return;
+        }
+
+        // Find the current chapter
+        const chapter = chapters.find(c => 
+            currentPage >= c.pageStart && currentPage <= c.pageEnd
+        );
+
         if (chapter) {
             fetch(`chapters/${chapter.file}`)
                 .then(response => response.text())
                 .then(content => {
-                    pageContainer.innerHTML = marked(content);
-                    updatePageNumber();
+                    pageContent.innerHTML = marked.parse(content);
                 })
                 .catch(error => {
-                    console.error('Error loading page content:', error);
-                    pageContainer.innerHTML = '<p class="error">Error loading page content.</p>';
+                    console.error('Error loading chapter:', error);
+                    pageContent.innerHTML = `<p class="error">Error loading chapter content: ${error.message}</p>`;
                 });
         }
     }
 
-    function setupNavigation() {
-        document.getElementById('prev-page').addEventListener('click', () => navigateToPage(currentPage - 1));
-        document.getElementById('next-page').addEventListener('click', () => navigateToPage(currentPage + 1));
-        
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') navigateToPage(currentPage - 1);
-            if (e.key === 'ArrowRight') navigateToPage(currentPage + 1);
-        });
-    }
+    function updateNavigation() {
+        const maxPage = chapters.length > 0 ? 
+            Math.max(...chapters.map(c => c.pageEnd)) : 
+            1;
 
-    function navigateToPage(newPage) {
-        const maxPage = chapters.reduce((max, chapter) => Math.max(max, chapter.pageEnd), 0);
-        if (newPage >= 1 && newPage <= maxPage) {
-            currentPage = newPage;
-            displayCurrentPage();
-            updateURL();
-        }
-    }
+        prevButton.disabled = currentPage <= 1;
+        nextButton.disabled = currentPage >= maxPage;
+        pageNumber.textContent = `Page ${currentPage}`;
 
-    function updatePageNumber() {
-        document.getElementById('page-number').textContent = `Page ${currentPage}`;
-    }
-
-    function updateURL() {
+        // Update URL
         const url = new URL(window.location);
         url.searchParams.set('page', currentPage);
         window.history.pushState({}, '', url);
     }
 
-    function handleURLParameters() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const pageParam = urlParams.get('page');
-        if (pageParam) {
-            const page = parseInt(pageParam);
-            if (!isNaN(page)) {
-                navigateToPage(page);
-            }
+    // Navigation event listeners
+    prevButton.addEventListener('click', () => {
+        if (currentPage > 1) {
+            currentPage--;
+            displayCurrentPage();
+            updateNavigation();
+        }
+    });
+
+    nextButton.addEventListener('click', () => {
+        const maxPage = chapters.length > 0 ? 
+            Math.max(...chapters.map(c => c.pageEnd)) : 
+            1;
+        if (currentPage < maxPage) {
+            currentPage++;
+            displayCurrentPage();
+            updateNavigation();
+        }
+    });
+
+    // Handle URL parameters on load
+    const urlParams = new URLSearchParams(window.location.search);
+    const pageParam = urlParams.get('page');
+    if (pageParam) {
+        const page = parseInt(pageParam);
+        if (!isNaN(page) && page >= 1) {
+            currentPage = page;
         }
     }
-
-    // Initialize the flipbook
-    loadChapters();
 });
