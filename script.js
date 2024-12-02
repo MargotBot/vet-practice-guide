@@ -1,95 +1,56 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const pageContent = document.getElementById('page-content');
-    const prevButton = document.getElementById('prev-page');
-    const nextButton = document.getElementById('next-page');
-    const pageNumber = document.getElementById('page-number');
+document.addEventListener('DOMContentLoaded', () => {
     let currentPage = 1;
-    let chapters = [];
+    const content = document.getElementById('page-content');
+    const prevBtn = document.getElementById('prev-page');
+    const nextBtn = document.getElementById('next-page');
+    const pageNum = document.getElementById('page-number');
 
-    // Load chapters configuration
-    fetch('chapters.json')
-        .then(response => response.json())
-        .then(data => {
-            chapters = data;
-            displayCurrentPage();
-            updateNavigation();
-        })
-        .catch(error => {
-            console.error('Error loading chapters:', error);
-            pageContent.innerHTML = `<p class="error">Error loading content: ${error.message}</p>`;
-        });
+    async function loadPage() {
+        try {
+            if (currentPage === 1) {
+                content.innerHTML = `
+                    <h1>Modern Veterinary Practice Management</h1>
+                    <h2>A Comprehensive Guide for Small and Medium Practices</h2>
+                    <p class="author">2024 Edition</p>
+                `;
+                return;
+            }
 
-    function displayCurrentPage() {
-        if (currentPage === 1) {
-            // Display cover page
-            pageContent.innerHTML = `
-                <h1>Modern Veterinary Practice Management</h1>
-                <h2>A Comprehensive Guide for Small and Medium Practices</h2>
-                <p class="author">2024 Edition</p>
-            `;
-            return;
+            const response = await fetch('chapters.json');
+            const chapters = await response.json();
+            
+            const chapter = chapters.find(c => 
+                currentPage >= c.pageStart && currentPage <= c.pageEnd
+            );
+
+            if (chapter) {
+                const chapterContent = await fetch(`chapters/${chapter.file}`);
+                const markdown = await chapterContent.text();
+                content.innerHTML = marked.parse(markdown);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            content.innerHTML = '<p class="error">Error loading content</p>';
         }
-
-        // Find the current chapter
-        const chapter = chapters.find(c => 
-            currentPage >= c.pageStart && currentPage <= c.pageEnd
-        );
-
-        if (chapter) {
-            fetch(`chapters/${chapter.file}`)
-                .then(response => response.text())
-                .then(content => {
-                    pageContent.innerHTML = marked.parse(content);
-                })
-                .catch(error => {
-                    console.error('Error loading chapter:', error);
-                    pageContent.innerHTML = `<p class="error">Error loading chapter content: ${error.message}</p>`;
-                });
-        }
+        pageNum.textContent = `Page ${currentPage}`;
+        prevBtn.disabled = currentPage <= 1;
+        nextBtn.disabled = currentPage >= 35; // Max pages from chapters.json
     }
 
-    function updateNavigation() {
-        const maxPage = chapters.length > 0 ? 
-            Math.max(...chapters.map(c => c.pageEnd)) : 
-            1;
-
-        prevButton.disabled = currentPage <= 1;
-        nextButton.disabled = currentPage >= maxPage;
-        pageNumber.textContent = `Page ${currentPage}`;
-
-        // Update URL
-        const url = new URL(window.location);
-        url.searchParams.set('page', currentPage);
-        window.history.pushState({}, '', url);
-    }
-
-    // Navigation event listeners
-    prevButton.addEventListener('click', () => {
+    prevBtn.onclick = () => {
         if (currentPage > 1) {
             currentPage--;
-            displayCurrentPage();
-            updateNavigation();
+            loadPage();
         }
-    });
+    };
 
-    nextButton.addEventListener('click', () => {
-        const maxPage = chapters.length > 0 ? 
-            Math.max(...chapters.map(c => c.pageEnd)) : 
-            1;
-        if (currentPage < maxPage) {
+    nextBtn.onclick = () => {
+        if (currentPage < 35) {
             currentPage++;
-            displayCurrentPage();
-            updateNavigation();
+            loadPage();
         }
-    });
+    };
 
-    // Handle URL parameters on load
-    const urlParams = new URLSearchParams(window.location.search);
-    const pageParam = urlParams.get('page');
-    if (pageParam) {
-        const page = parseInt(pageParam);
-        if (!isNaN(page) && page >= 1) {
-            currentPage = page;
-        }
-    }
+    // Initialize
+    loadPage();
 });
