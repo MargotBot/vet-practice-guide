@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const prevBtn = document.getElementById('prev-page');
     const nextBtn = document.getElementById('next-page');
     const pageNum = document.getElementById('page-number');
+    
+    const BASE_URL = 'https://raw.githubusercontent.com/MargotBot/vet-practice-guide/gh-pages/';
 
     async function loadPage() {
         try {
@@ -16,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const response = await fetch('chapters.json');
+            const response = await fetch(`${BASE_URL}chapters.json`);
             const chapters = await response.json();
             
             const chapter = chapters.find(c => 
@@ -24,14 +26,15 @@ document.addEventListener('DOMContentLoaded', () => {
             );
 
             if (chapter) {
-                const chapterContent = await fetch(`chapters/${chapter.file}`);
+                const chapterContent = await fetch(`${BASE_URL}chapters/${chapter.file}`);
                 const markdown = await chapterContent.text();
                 content.innerHTML = marked.parse(markdown);
             }
         } catch (error) {
             console.error('Error:', error);
-            content.innerHTML = '<p class="error">Error loading content</p>';
+            content.innerHTML = `<p class="error">Error loading content: ${error.message}</p>`;
         }
+        
         pageNum.textContent = `Page ${currentPage}`;
         prevBtn.disabled = currentPage <= 1;
         nextBtn.disabled = currentPage >= 35; // Max pages from chapters.json
