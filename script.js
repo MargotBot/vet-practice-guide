@@ -1,3 +1,4 @@
+
 $(document).ready(function() {
     var totalChapters = 9;
     var loadedChapters = 0;
